@@ -36,13 +36,14 @@ for my $t (1 .. 10) {
 
 for my $t (1 .. 10) {
 	my $timer;
-	$timer = AE::timer 0.01, 0, sub {
+	$timer = AE::timer 0.01 + $t/100, 0, sub {
 		ok(my $dbh = db_connect(), "connected $t");
-		ok(my $sth = $dbh->prepare('select pg_sleep(2)'), "prepared $t");
+		ok(my $sth = $dbh->prepare('select pg_sleep(' . $t . ')'), "prepared $t");
 		my $start_time = time;
 		ok($sth->execute(), "executed $t");
 		my $duration = time - $start_time;
-		ok(($duration > 1 && $duration < 3), "slept $t");
+		ok(($duration > $t - 1 && $duration < $t + 1), "slept $t");
+		print "duration: $t: $duration\n";
 		$status += 1 << $t;
 		if ($status == $finished) {
 			$cv->send;

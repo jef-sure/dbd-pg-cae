@@ -52,19 +52,23 @@ DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
 		my $res   = $sth->SUPER::execute(@vars);
 		my $dbh   = $sth->{Database};
 		my $async = new Coro::State;
-		while (!$dbh->pg_ready) {
-			my $w;
-			$w = AnyEvent->io(
-				fh   => $dbh->{pg_socket},
-				poll => 'r',
-				cb   => sub {
-					undef $w;
-					my $new;
-					$new = new Coro::State sub {$new->transfer($async);}
-				}
-			);
-			EV::run EV::RUN_ONCE;
-		}
+		my $new;
+		$new = new Coro::State sub {
+			while (!$dbh->pg_ready) {
+				my $w;
+				$w = AnyEvent->io(
+					fh   => $dbh->{pg_socket},
+					poll => 'r',
+					cb   => sub {
+						undef $w;
+						$new->transfer($async);
+					}
+				);
+				print "run once before statement: $sth->{Statement}\n";
+				EV::run EV::RUN_ONCE;
+			}
+		};
+		$async->transfer($new);
 		$res = $dbh->pg_result;
 		$res;
 	}
