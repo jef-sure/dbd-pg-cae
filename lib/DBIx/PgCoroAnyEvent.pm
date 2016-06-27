@@ -62,15 +62,21 @@ DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
 					cb   => sub {
 						if($dbh->pg_ready) {
 							$w = undef;
+							print "ready statement: $sth->{Statement}\n";
 							$new->transfer($async);
 						} 
 					}
 				) if not $w;
-				print "run once before statement: $sth->{Statement}\n";
+				print "run once in statement: $sth->{Statement}\n";
 				EV::run EV::RUN_ONCE;
 			}
+			print "defined w: " . (defined $w? 'true': 'false') . "\n";
+			print "finished statement: $sth->{Statement}\n??? how is this place reached???\n";
 		};
+		print "before async statement: $sth->{Statement}\n";
 		$async->transfer($new);
+		$new->cancel;
+		print "after async statement: $sth->{Statement}\n";
 		$res = $dbh->pg_result;
 		$res;
 	}
