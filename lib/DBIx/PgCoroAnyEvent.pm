@@ -51,32 +51,7 @@ DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
 		my ($sth, @vars) = @_;
 		my $res   = $sth->SUPER::execute(@vars);
 		my $dbh   = $sth->{Database};
-		my $async = new Coro::State;
-		my $new;
-		$new = new Coro::State sub {
-			my $w;
-			while (!$dbh->pg_ready) {
-				$w = AnyEvent->io(
-					fh   => $dbh->{pg_socket},
-					poll => 'r',
-					cb   => sub {
-						if($dbh->pg_ready) {
-							$w = undef;
-							print "ready statement: $sth->{Statement}\n";
-							$new->transfer($async);
-						} 
-					}
-				) if not $w;
-				print "run once in statement: $sth->{Statement}\n";
-				EV::run EV::RUN_ONCE;
-			}
-			print "defined w: " . (defined $w? 'true': 'false') . "\n";
-			print "finished statement: $sth->{Statement}\n??? how is this place reached???\n";
-		};
-		print "before async statement: $sth->{Statement}\n";
-		$async->transfer($new);
-		$new->cancel;
-		print "after async statement: $sth->{Statement}\n";
+		Coro::AnyEvent::readable $dbh->{pg_socket} while !$dbh->pg_ready;
 		$res = $dbh->pg_result;
 		$res;
 	}

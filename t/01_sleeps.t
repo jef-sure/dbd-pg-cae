@@ -31,7 +31,7 @@ is(ref($sth), 'DBIx::PgCoroAnyEvent::st', 'sth class');
 for my $t (1 .. 10) {
 	my $timer;
 	$cv->begin;
-	$timer = AE::timer 0.01 + $t / 100, 0, sub {
+	$timer = AE::timer 0.01 + $t / 100, 0, unblock_sub {
 		ok(my $dbh = db_connect(), "connected $t");
 		ok(my $sth = $dbh->prepare('select pg_sleep(' . $t . ')'), "prepared $t");
 		my $start_time = time;
