@@ -27,16 +27,11 @@ my $duration = time - $start_time;
 ok(($duration > 1 && $duration < 3), 'slept');
 is(ref($dbh), 'DBIx::PgCoroAnyEvent::db', 'dbh class');
 is(ref($sth), 'DBIx::PgCoroAnyEvent::st', 'sth class');
-my $status   = 0;
-my $finished = 0;
-
-for my $t (1 .. 10) {
-	$finished += 1 << $t;
-}
 
 for my $t (1 .. 10) {
 	my $timer;
-	$timer = AE::timer 0.01 + $t/100, 0, sub {
+	$cv->begin;
+	$timer = AE::timer 0.01 + $t / 100, 0, sub {
 		ok(my $dbh = db_connect(), "connected $t");
 		ok(my $sth = $dbh->prepare('select pg_sleep(' . $t . ')'), "prepared $t");
 		my $start_time = time;
@@ -44,10 +39,7 @@ for my $t (1 .. 10) {
 		my $duration = time - $start_time;
 		ok(($duration > $t - 1 && $duration < $t + 1), "slept $t");
 		print "duration: $t: $duration\n";
-		$status += 1 << $t;
-		if ($status == $finished) {
-			$cv->send;
-		}
+		$cv->end;
 		undef $timer;
 	};
 }
