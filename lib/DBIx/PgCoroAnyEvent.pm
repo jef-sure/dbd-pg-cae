@@ -59,12 +59,16 @@ DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
 				$w = AnyEvent->io(
 					fh   => $dbh->{pg_socket},
 					poll => 'r',
-					cb   => sub {$w = undef}
+					cb   => sub {
+						if($dbh->pg_ready) {
+							$w = undef;
+							$new->transfer($async);
+						} 
+					}
 				) if not $w;
 				print "run once before statement: $sth->{Statement}\n";
 				EV::run EV::RUN_ONCE;
 			}
-			$new->transfer($async);
 		};
 		$async->transfer($new);
 		$res = $dbh->pg_result;
