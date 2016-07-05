@@ -1,5 +1,6 @@
 0.02 Tue 5 Jul 17:45:42 CEST 2016
          - fix required modules for testing
+         - fix testing messages and current version
 
 0.01 Tue 5 Jul 17:27:42 CEST 2016
          - first release

@@ -10,7 +10,7 @@ use Time::HiRes 'time';
 use PgSet;
 
 ok(PgSet::initdb,  'local postgres db initialized');
-ok(PgSet::startdb, 'local postgres db initialized');
+ok(PgSet::startdb, 'local postgres db started');
 
 sub db_connect {
 	DBI->connect(
