@@ -3,7 +3,6 @@ use lib "$Bin/../lib";
 use lib "$Bin/../t";
 use Test::More;
 use DBI;
-use EV;
 use Coro;
 use AnyEvent;
 use Coro::AnyEvent;

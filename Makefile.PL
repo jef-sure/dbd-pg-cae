@@ -24,9 +24,10 @@ WriteMakefile(
 		'Coro::AnyEvent' => 0,
 	},
 	TEST_REQUIRES => {
-		'Test::More' => 0,
-		'DBI'        => 0,
-		'File::Temp' => 0
+		'Test::More'  => 0,
+		'DBI'         => 0,
+		'File::Temp'  => 0,
+		'Time::HiRes' => 0,
 	},
 	test => {TESTS => "t/*.t"},
 	dist => {

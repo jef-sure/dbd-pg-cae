@@ -7,6 +7,7 @@ on 'test' => sub {
     requires 'Test::More';
     requires 'DBI';
     requires 'File::Temp';
+    requires 'Time::HiRes';
 };
 on configure => sub {
     requires 'ExtUtils::MakeMaker';
