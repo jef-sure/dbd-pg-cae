@@ -1,4 +1,6 @@
-use lib qw'../lib lib t';
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+use lib "$Bin/../t";
 use Test::More;
 use DBI;
 use EV;
@@ -6,11 +8,16 @@ use Coro;
 use AnyEvent;
 use Coro::AnyEvent;
 use Time::HiRes 'time';
+use PgSet;
+
+ok(PgSet::initdb,  'local postgres db initialized');
+ok(PgSet::startdb, 'local postgres db initialized');
 
 sub db_connect {
 	DBI->connect(
-		"dbi:Pg:dbname=anton",
-		"anton", "",
+		"dbi:Pg:dbname=postgres",
+		$PgSet::testuser,
+		"",
 		{   AutoCommit => 1,
 			RootClass  => 'DBIx::PgCoroAnyEvent'
 		}

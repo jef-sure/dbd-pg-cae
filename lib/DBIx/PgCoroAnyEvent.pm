@@ -2,6 +2,8 @@
 
 	package DBIx::PgCoroAnyEvent;
 
+	our $VERSION = "0.01";
+
 =head1 NAME
  
 DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
@@ -41,7 +43,6 @@ DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
 {
 
 	package DBIx::PgCoroAnyEvent::st;
-	use EV;
 	use Coro;
 	use AnyEvent;
 	use Coro::AnyEvent;
@@ -49,8 +50,8 @@ DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
 
 	sub execute {
 		my ($sth, @vars) = @_;
-		my $res   = $sth->SUPER::execute(@vars);
-		my $dbh   = $sth->{Database};
+		my $res = $sth->SUPER::execute(@vars);
+		my $dbh = $sth->{Database};
 		Coro::AnyEvent::readable $dbh->{pg_socket} while !$dbh->pg_ready;
 		$res = $dbh->pg_result;
 		$res;
