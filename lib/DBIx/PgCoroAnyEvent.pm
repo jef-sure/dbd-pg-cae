@@ -2,7 +2,7 @@
 
 	package DBIx::PgCoroAnyEvent;
 
-	our $VERSION = "0.02";
+	our $VERSION = "0.03";
 
 =head1 NAME
  
@@ -31,6 +31,37 @@ DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
 		DBD::Pg::db::prepare($dbh, $statement, @attribs);
 	}
 
+	sub selectrow_arrayref {
+		my ($dbh, $stmt, $attr, @bind) = @_;
+		my $sth = ((ref $stmt) ? $stmt : $dbh->prepare($stmt, $attr)) or return;
+		$sth->execute(@bind) or return;
+		my $row = $sth->fetchrow_arrayref() and $sth->finish;
+		return $row;
+	}
+
+	sub selectrow_array {
+		my ($dbh, $stmt, $attr, @bind) = @_;
+		my $rowref = $dbh->selectrow_arrayref($stmt, $attr, @bind) or return;
+		@$rowref;
+	}
+
+	sub selectall_arrayref {
+		my ($dbh, $stmt, $attr, @bind) = @_;
+		my $sth = (ref $stmt) ? $stmt : $dbh->prepare($stmt, $attr)
+			or return;
+		$sth->execute(@bind) || return;
+		my $slice = $attr->{Slice};    # typically undef, else hash or array ref
+		if (!$slice and $slice = $attr->{Columns}) {
+			if (ref $slice eq 'ARRAY') {    # map col idx to perl array idx
+				$slice = [@{$attr->{Columns}}];    # take a copy
+				for (@$slice) {$_--}
+			}
+		}
+		my $rows = $sth->fetchall_arrayref($slice, my $MaxRows = $attr->{MaxRows});
+		$sth->finish if defined $MaxRows;
+		return $rows;
+	}
+
 	sub do {
 		my ($dbh, $statement, $attr, @params) = @_;
 		my $sth = $dbh->prepare($statement, $attr) or return undef;
@@ -53,8 +84,7 @@ DBIx::PgCoroAnyEvent - DBD::Pg + Coro + AnyEvent
 		my $res = $sth->SUPER::execute(@vars);
 		my $dbh = $sth->{Database};
 		Coro::AnyEvent::readable $dbh->{pg_socket} while !$dbh->pg_ready;
-		$res = $dbh->pg_result;
-		$res;
+		$dbh->pg_result;
 	}
 }
 
