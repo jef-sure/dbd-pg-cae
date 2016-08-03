@@ -1,3 +1,6 @@
+0.04 Wed 3 Aug 08:52:59 CEST 2016
+         - skip tests without postgres
+         
 0.03 Wed 6 Jul 23:59:59 CEST 2016
          - avoid ::db XS functions selectrow_array/ref, selectall_arrayref
          
